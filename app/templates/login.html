@@ -1,8 +1,41 @@
-<html>
-   <head>
-      <title>Login</title>
-   </head>
-   <body>
-      <h1>Login</h1>
-   </body>
-   </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+   
+    <div class="wrapper">
+            <div class="form-body">
+                <form action="">
+                  <div class="input-box">
+                    <label for="Username">System Id or Username</label>
+                    <br>
+                    <input type="text" name="username" id="Username" placeholder="Admin" required>
+                    <i class='bx bxs-user'></i>
+                  </div>
+                  <div class="input-box">
+                    <label for="password">Password</label>
+                    <br>
+                    <input type="password" name="password" id="password" placeholder="Password">
+                    <i class='bx bxs-lock'></i>
+                  </div>
+                  <br>
+                  <div class="forget">
+                     <a href="#">Forget Password?</a>
+                  </div>
+                  <button type="submit" class="btn"> Log In</button>
+                  <div class="register">
+                     <p>Don't have an account? <a href="/registerUser">Register</a></p>
+                  </div>
+                </form>
+
+        </div>
+    </div>
+
+</body>
+</html>
