@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: Fabrico2
-      POSTGRES_PASSWORD: fabrico2
+      POSTGRES_PASSWORD: Fabrico2
       POSTGRES_DB: Fabrico2
     ports:
       - "5432:5432"
