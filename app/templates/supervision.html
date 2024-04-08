@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="content">
+    <div class="container-supervision">
+        <div class="col-md">
+            <div class="col-md">
+                <h4>Roll ID</h4>
+                <p>APWS-026</p>
+            </div>
+            <div class="col-md">
+                <h4>Roll Name</h4>
+                <p>Pearl-White-Silk-Roll</p>
+            </div>
+            <div class="col-md">
+                <h4>Total Defects</h4>
+                <p>4</p>
+            </div>
+            <div class="col-md">
+                <h4>Defect Type</h4>
+                <p>Vertical line - 2<br>Hole - 1</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="upload-section" id="uploadSection">
+    <h4>Upload Video/Image To Be Processed</h4>
+    <input type="file" id="mediaFile" accept="image/*, video/*">
+    <div class="uploaded-media" id="uploadedMedia"></div>
+</div>
+<script>
+    document.getElementById('mediaFile').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var mediaType = file.type.split('/')[0];
+            var uploadedMedia = document.getElementById('uploadedMedia');
+            uploadedMedia.innerHTML = '';
+
+            if (mediaType === 'image') {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                uploadedMedia.appendChild(img);
+            } else if (mediaType === 'video') {
+                var video = document.createElement('video');
+                video.src = e.target.result;
+                video.controls = true;
+                video.style.maxWidth = '100%';
+                video.style.height = 'auto';
+                uploadedMedia.appendChild(video);
+            }
+            uploadedMedia.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+{% endblock %}
