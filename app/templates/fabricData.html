@@ -1,3 +1,5 @@
+<!-- fabricData.html -->
+
 {% extends 'base.html' %}
 {% block content %}
     <!-- Content -->
@@ -7,27 +9,19 @@
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th scope="col">Roll Id</th>
-                            <th scope="col">Roll Name</th>
-                            <th scope="col">No Of Defects</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Fabric ID</th>
+                            <th scope="col">Total Defects</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>DBZ</td>
-                            <td><a href="defects1.html">3</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>DBS</td>
-                            <td><a href="defects2.html">5</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>ABC</td>
-                            <td><a href="defects3.html">2</a></td>
-                        </tr>
+                        {% for fabric in fabrics %}
+                            <tr>
+                                <td>{{ fabric.id }}</td>
+                                <td>{{ fabric.fabric_id }}</td>
+                                <td>{{ fabric.total_defects }}</td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
