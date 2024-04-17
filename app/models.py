@@ -1,5 +1,5 @@
 # app/models.py
-
+from datetime import datetime
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -26,11 +26,12 @@ class Fabric(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fabric_id = db.Column(db.Text, unique=True)
     total_defects = db.Column(db.Integer)
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 class FabricDefects(db.Model):
     __tablename__ = 'FabricDefects'
     id = db.Column(db.Integer, primary_key=True)
-    defect_id = db.Column(db.Integer, db.ForeignKey(Defect.id),nullable=False)
+    defect = db.Column(db.Text, db.ForeignKey('defect.defect'), nullable=False)
     fabric_id = db.Column(db.Text, db.ForeignKey(Fabric.fabric_id),nullable=False)
     defectimage = db.Column(db.LargeBinary)
 

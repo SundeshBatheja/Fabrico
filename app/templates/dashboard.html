@@ -13,32 +13,36 @@
         <script type="text/javascript">
           google.charts.load('current', {'packages':['corechart']});
           google.charts.setOnLoadCallback(drawChart);
-    
+          
+       
           function drawChart() {
-    
-            var data = google.visualization.arrayToDataTable([
-              ['Condition', 'Count'],
-              ['Defected',     13],
-              ['No Defects',      10],
-            ]);
-            
+        var data = google.visualization.arrayToDataTable([
+            ['Condition', 'Count'],
+            ['Defected',{{ defected_count |tojson }}],
+            ['No Defects', {{ non_defected_count |tojson }}],
+        ]);
+            options = {
+                title: 'Total Fabric Rolls Summary',
+                is3D: true,
+                colors: ['#867eea', '#4a1ede']
+            };
         
             var chart = new google.visualization.PieChart(document.getElementById('piechart'));
     
-            chart.draw(data);
+            chart.draw(data,options);
 
             var data = google.visualization.arrayToDataTable([
             ['Effort', 'Amount given'],
-            ['Defected',     90],
-            ['No Defects',     10]
+            ['Defected', {{ defected_count_today | tojson }}],
+            ['No Defects', {{ non_defected_count_today | tojson }}]
             ]);
 
             var options = {
+            title: "Today's Summary",
             pieHole: 0.5,
             pieSliceTextStyle: {
                 color: 'white',
             },
-            legend: 'none',
             colors: ['#867eea', '#4a1ede']
             };
 
@@ -47,12 +51,11 @@
 
             var data = google.visualization.arrayToDataTable([
           ['Defect Types', 'Occuring'],
-          ['Oil Stains', 18], ['Holes', 40], ['Vertical Lines', 30],
-          ['Horizontal Lines', 12]
+          ['Oil Stains', {{ stain_count | tojson }}], ['Holes',{{ hole_count | tojson }}], ['Lines', {{ line_count | tojson }}],
+          ['Knots', {{ knot_count | tojson }}]
         ]);
         var options = {
           title: 'Defects Summary',
-          legend: 'none',
           pieSliceTextStyle: {
                 color: 'white',
             },
@@ -65,25 +68,55 @@
         var chart = new google.visualization.PieChart(document.getElementById('piechart2'));
         chart.draw(data, options);
         var data = google.visualization.arrayToDataTable([
-          ['Defects', 'Today', 'Yesterday'],
-          ['50',  1000,      400],
-          ['2005',  1170,      460],
-          ['2006',  660,       1120],
-          ['2007',  1030,      540]
-        ]);
+        ["Element", "Defects", { role: "style" } ],
+        ["Today",{{defected_count_today | tojson}}, "blue"],
+        ["Yesterday", {{defected_count_yesterday | tojson}}, "brown"]
+      ]);
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
 
-        var options = {
-          title: 'Company Performance',
-          curveType: 'function',
-          legend: { position: 'bottom' }
-        };
+      var options = {
+        title: "Yesterday vs Today Defects Summary",
+        width: 350,
+        height: 300,
+        bar: {groupWidth: "15%"},
+        legend: { position: "none" },
+      };
+      var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+      chart.draw(view, options);
+      var data = google.visualization.arrayToDataTable([
+        ["Grade", "Total Count", { role: "style" } ],
+        ["Grade A", 2, "Blue"],
+        ["Grade B", 5, "Brown"],
+        ["Grade C", 10, "Green"],
+        ["Other", 20, "red"]
+      ]);
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
 
-        chart.draw(data, options);
-        
-          }
-           
+      var options = {
+        title: "Fabric Grades Summary",
+        width: 500,
+        height: 350,
+        bar: {groupWidth: "45%"},
+        legend: { position: "none" },
+      };
+      var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values"));
+      chart.draw(view, options);
+    }
+    
+   
         </script>
       </head>
 </head>
@@ -123,22 +156,21 @@
         <div class="container-dashboard">
             <div class="row">
                 <div class="col">
-                    <h5>Total Defects</h5>
-                    <div id="piechart" style="width: 600px; height: 250px;"></div>
+                    <div id="piechart" style="width: 450px; height: 300px;"></div>
                 </div>
                 <div class="col">
-                    <div id="donut_single" style="width: 400px; height: 250px;"></div>
+                    <div id="donut_single" style="width: 450px; height: 300px;"></div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <div id="piechart2" style="width: 450px; height: 250px;"></div>
+                    <div id="piechart2" style="width: 450px; height: 350px;"></div>
                 </div>
                 <div class="col">
-                    <div id="lower-part2" style="height: 166px;">Lower Part 2</div>
+                    <div id="columnchart_values" style="width: 100px; height: 100px;;"></div>
                 </div>
                 <div class="col">
-                    <div id="curve_chart" style="width: 400px; height: 200px"></div>
+                    <div id="barchart_values" style="width: 100px; height: 100px"></div>
                 </div>
             </div>
         </div>
