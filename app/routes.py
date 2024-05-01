@@ -1,11 +1,39 @@
 from datetime import date, timedelta
-from flask import jsonify, render_template
+from flask import render_template, Response,jsonify,request,session
 from flask import Blueprint
+from flask_wtf import FlaskForm
+from wtforms import FileField, SubmitField,StringField,DecimalRangeField,IntegerRangeField
+from wtforms.validators import InputRequired,NumberRange
 from flask import request
+from werkzeug.utils import secure_filename
 from app.models import Defect,Fabric, FabricDefects
 from app import db
+from app.processing.videoProcess import video_detection
+import os
+import cv2
+
+def generate_frames(path_x = ''):
+    output = video_detection(path_x)
+    yolo_output= next()
+    count = next(output)
+    for detection_ in yolo_output:
+        ref,buffer=cv2.imencode('.jpg',detection_)
+
+        frame=buffer.tobytes()
+        yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame +b'\r\n')
+
+class UploadFileForm(FlaskForm):
+    #We store the uploaded video file path in the FileField in the variable file
+    #We have added validators to make sure the user inputs the video in the valid format  and user does upload the
+    #video when prompted to do so
+    file = FileField("File",validators=[InputRequired()])
+    submit = SubmitField("Run")
 
 FabricoPrefix = Blueprint('Fabrico', __name__, url_prefix='/Fabrico',template_folder="templates")
+UPLOAD_FOLDER = os.path.join('uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 @FabricoPrefix.route('/')
 def login():
@@ -23,10 +51,36 @@ def index():
     fabrics = Fabric.query.all()
     return render_template('fabricData.html',title=title, fabrics=fabrics)
 
-@FabricoPrefix.route('/supervision')
+@FabricoPrefix.route('/supervision',methods=['GET','POST'])
 def supervision():
     title = "Supervision"
-    return render_template('supervision.html',title=title)
+    form = UploadFileForm()
+    if form.validate_on_submit():
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+        session['video_path'] = file_path
+    return render_template('supervision.html',title=title,form = form)
+
+@FabricoPrefix.route('/upload', methods=['POST'])
+def upload():
+    if 'mediaFile' not in request.files:
+        return 'No file part'
+    file = request.files['mediaFile']
+    if file.filename == '':
+        return 'No selected file'
+    if file:
+        # Save the file to the 'uploads' folder
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+        return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    
+@FabricoPrefix.route('/video')
+def video():
+    #return Response(generate_frames(path_x='static/files/bikes.mp4'), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(path_x = session.get('video_path', None)),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @FabricoPrefix.route('/dashboard')
 def dashboard():

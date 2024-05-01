@@ -23,7 +23,7 @@ insert_query = sql.SQL("""
 """)
 
 # Define the values to be inserted
-values = ("FAB002", "Line", psycopg2.Binary(image_data))
+values = ("FAB0025", "Stain", psycopg2.Binary(image_data))
 
 try:
     # Execute the SQL query
