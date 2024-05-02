@@ -1,4 +1,4 @@
-knot
 hole
-stain
+knot
 line
+stain

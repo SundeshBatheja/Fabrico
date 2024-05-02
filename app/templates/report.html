@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="content">
+    <div class="container-supervision">
+        <div class="col-md">
+            <div class="col-md">
+                <h4>Roll ID</h4>
+                <p>APWS-026</p>
+            </div>
+            <div class="col-md">
+                <h4>Roll Name</h4>
+                <p>Pearl-White-Silk-Roll</p>
+            </div>
+            <div class="col-md">
+                <h4>Total Defects</h4>
+                <p>5</p>
+            </div>
+            <div class="col-md">
+                <h4>Defect Type</h4>
+                <p>Lines - 2<br>Holes - 3</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<section class="col-sm " >
+    <img src="{{ url_for('Fabrico.upload_video') }}"   alt="Upload video">
+</section>
+<section>
+<div class="new" >
+<form method = 'POST' enctype="multipart/form-data" style="align-content: center; text-align: center;display: flex;">
+    {{form.hidden_tag()}}
+    {{form.file(class_="custom-file-input")}}
+    <div>
+    <button type="submit" name="favorite" value="x" class="btnCustom">
+        Submit
+    </button>
+  </div>
+  </form>
+</div>
+</section>
+
+{% endblock %}

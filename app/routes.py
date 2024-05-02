@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from flask import render_template, Response,jsonify,request,session
+from flask import render_template, Response,jsonify,request,session, redirect, url_for
 from flask import Blueprint
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField,StringField,DecimalRangeField,IntegerRangeField
@@ -12,15 +12,17 @@ from app.processing.videoProcess import video_detection
 import os
 import cv2
 
-def generate_frames(path_x = ''):
+
+def generate_frames(path_x=''):
     yolo_output = video_detection(path_x)
     for detection_ in yolo_output:
-        ref,buffer=cv2.imencode('.jpg',detection_)
-
-        frame=buffer.tobytes()
+        if detection_ is None:
+            break
+        ref, buffer = cv2.imencode('.jpg', detection_)
+        frame = buffer.tobytes()
         yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame +b'\r\n')
-
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
 class UploadFileForm(FlaskForm):
     file = FileField("File",validators=[InputRequired()])
     submit = SubmitField("Run")
@@ -29,6 +31,8 @@ FabricoPrefix = Blueprint('Fabrico', __name__, url_prefix='/Fabrico',template_fo
 UPLOAD_FOLDER = os.path.join('uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+    
+
 
 @FabricoPrefix.route('/')
 def login():
@@ -60,9 +64,12 @@ def supervision():
 
 @FabricoPrefix.route('/video')
 def video():
-    #return Response(generate_frames(path_x='static/files/bikes.mp4'), mimetype='multipart/x-mixed-replace; boundary=frame')
-    return Response(generate_frames(path_x = session.get('video_path', None)),mimetype='multipart/x-mixed-replace; boundary=frame')
-
+    video_path = session.get('video_path', None)
+    if video_path:
+        session.pop('video_path')  # Remove video_path from session after processing once
+        return Response(generate_frames(video_path), mimetype='multipart/x-mixed-replace; boundary=frame')
+    else:
+        return "No video uploaded"
 
 @FabricoPrefix.route('/dashboard')
 def dashboard():

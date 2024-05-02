@@ -176,13 +176,13 @@ padding: 28px 18px; /* Adjust the padding value as needed */
 }
 
 section.col-sm{
-    background-color:rgb(2, 2, 2);
+    background-color:rgb(255, 255, 255);
     width: 350px;
     height: 550px;
     border-radius: 35px;
     object-fit: contain;
-    margin-left:700px;
-    margin-top: -550px;
+    margin-left: 650px;
+    margin-top: -15px;
   }
 
   .new{
