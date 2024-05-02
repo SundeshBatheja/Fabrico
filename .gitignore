@@ -9,3 +9,4 @@ uploads/
 *.pyc
 *.pyo
 *.pyd
+myenv/
