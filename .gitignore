@@ -2,8 +2,10 @@
 
 .idea/
 .vscode/
-
+D:\Workspace\fabrico2\app\processing\best.pt
+D:\Workspace\fabrico2\app\processing\oldbest.pt
 __pycache__/
+uploads/
 *.pyc
 *.pyo
 *.pyd

@@ -23,6 +23,12 @@ def generate_frames(path_x=''):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
+    defect_dir = 'app/processing/defects'
+    total_files = len(os.listdir(defect_dir))
+    # Do something with the total file count (e.g., print it)
+    print(f"Total number of files in defects directory: {total_files}")
+    #here i want total no means count of files in app/processing/defects 
+        
 class UploadFileForm(FlaskForm):
     file = FileField("File",validators=[InputRequired()])
     submit = SubmitField("Run")
