@@ -1,6 +1,7 @@
 from datetime import date, timedelta
-from flask import render_template, Response,jsonify,request,session, redirect, url_for
+from flask import render_template, Response,jsonify,request,session, redirect, url_for, current_app
 from flask import Blueprint
+import flask
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField,StringField,DecimalRangeField,IntegerRangeField
 from wtforms.validators import InputRequired,NumberRange
@@ -23,11 +24,8 @@ def generate_frames(path_x=''):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
-    defect_dir = 'app/processing/defects'
-    total_files = len(os.listdir(defect_dir))
-    # Do something with the total file count (e.g., print it)
-    print(f"Total number of files in defects directory: {total_files}")
-    #here i want total no means count of files in app/processing/defects 
+
+     
         
 class UploadFileForm(FlaskForm):
     file = FileField("File",validators=[InputRequired()])
@@ -76,6 +74,42 @@ def video():
         return Response(generate_frames(video_path), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         return "No video uploaded"
+    
+@FabricoPrefix.route('/addFabric', methods=['GET', 'POST'])
+def addFabric():
+    if request.method == 'POST':
+        defectDir = 'app/static/defects'  # Use forward slashes instead of backslashes
+        total_defects = len(os.listdir(defectDir)) // 3
+        fabrics = Fabric.query.all()
+        fabricNum = len(fabrics)
+        fabric_id = f"FAB{fabricNum + 1}"
+        today_date = date.today()
+        new_fabric = Fabric(
+            fabric_id=fabric_id,
+            total_defects=total_defects,
+            date_added=today_date
+        )
+        print(fabric_id, total_defects, today_date)
+        db.session.add(new_fabric)
+        db.session.commit()
+        defect_types = {}
+        defect_images = {}
+        for defect_type in ['Hole', 'Stain', 'Line', 'Knot']:
+            count = len([f for f in os.listdir(defectDir) if f.startswith(defect_type)]) // 3
+            if count > 0:
+                defect_types[defect_type] = int(count)
+                defect_images[defect_type] = []
+
+                # Get the images for the defect type
+                for i in range(1, count + 1):
+                    original_image = f"{defect_type}_{i}.jpg"
+                    mask_image = f"{defect_type}_{i}_Mask.jpg"
+                    boundary_image = f"{defect_type}_{i}_boundary.jpg"
+                    defect_images[defect_type].append((original_image, mask_image, boundary_image))
+        return render_template('report.html', fabric_id=fabric_id, total_defects=total_defects,
+                               date_added=today_date, defect_types=defect_types, defect_images=defect_images)
+    else:
+        return "View Report Form"
 
 @FabricoPrefix.route('/dashboard')
 def dashboard():

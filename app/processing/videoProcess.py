@@ -90,20 +90,20 @@ def video_detection(video):
                         Holes.append(id1)
                         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
                         image_name = f"Hole_{frame_countHole}_Mask.jpg"
-                        cv2.imwrite(f'app\processing\defects\Hole_{frame_countHole}_Mask.jpg', roi_gray)
+                        cv2.imwrite(f'app\static\defects\Hole_{frame_countHole}_Mask.jpg', roi_gray)
                         # Read the grayscale image
                         # Read the grayscale image
                         # Apply Canny edge detection
                         edges = cv2.Canny(roi_gray, 50, 150)
 
                         # Step 5: Save the boundary image
-                        cv2.imwrite(f'app\processing\defects\Hole_{frame_countHole}_boundary.jpg', edges)
+                        cv2.imwrite(f'app\static\defects\Hole_{frame_countHole}_boundary.jpg', edges)
 
                         cv2.circle(frame, (cx3, cy3), 4, (255, 0, 255), -1)
                         cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 0, 0), 2)
                         cvzone.putTextRect(frame, f'{id1}', (x3, y3), 1, 1)
 
-                        image_name = f"app\processing\defects\Hole_{frame_countHole}.jpg"
+                        image_name = f"app\static\defects\Hole_{frame_countHole}.jpg"
                         cv2.imwrite(image_name, frame)
                         frame_countHole += 1 
             
@@ -123,7 +123,7 @@ def video_detection(video):
                         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
                         roi_gray_eq = cv2.equalizeHist(roi_gray)
                         image_name = f"Stain_{frame_countStain}_Mask.jpg"
-                        cv2.imwrite(f'app\processing\defects\Stain_{frame_countStain}_Mask.jpg', roi_gray_eq)
+                        cv2.imwrite(f'app\static\defects\Stain_{frame_countStain}_Mask.jpg', roi_gray_eq)
                         # Read the grayscale image
                         # Read the grayscale image
                         # Apply Canny edge detection
@@ -136,13 +136,13 @@ def video_detection(video):
                         edges = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 4)
 
                         # Save the boundary image
-                        cv2.imwrite(f'app\processing\defects\Stain_{frame_countStain}_boundary.jpg', edges)
+                        cv2.imwrite(f'app\static\defects\Stain_{frame_countStain}_boundary.jpg', edges)
 
                         cv2.circle(frame, (cx4, cy4), 4, (255, 0, 255), -1)
                         cv2.rectangle(frame, (x5, y5), (x6, y6), (255, 0, 0), 2)
                         cvzone.putTextRect(frame, f'{id2}', (x5, y5), 1, 1)
 
-                        image_name = f"app\processing\defects\Stain_{frame_countStain}.jpg"
+                        image_name = f"app\static\defects\Stain_{frame_countStain}.jpg"
                         cv2.imwrite(image_name, frame)
                         frame_countStain += 1    
 
@@ -161,20 +161,20 @@ def video_detection(video):
                         Knots.append(id3)
                         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
                         image_name = f"Knot_{frame_countKnot}_Mask.jpg"
-                        cv2.imwrite(f'app\processing\defects\Knot_{frame_countKnot}_Mask.jpg', roi_gray)
+                        cv2.imwrite(f'app\static\defects\Knot_{frame_countKnot}_Mask.jpg', roi_gray)
                         # Read the grayscale image
                         # Read the grayscale image
                         # Apply Canny edge detection
                         edges = cv2.Canny(roi_gray, 50, 150)
 
                         # Step 5: Save the boundary image
-                        cv2.imwrite(f'app\processing\defects\Knot_{frame_countKnot}_boundary.jpg', edges)
+                        cv2.imwrite(f'app\static\defects\Knot_{frame_countKnot}_boundary.jpg', edges)
 
                         cv2.circle(frame, (cx5, cy5), 4, (255, 0, 255), -1)
                         cv2.rectangle(frame, (x7, y7), (x8, y8), (255, 0, 0), 2)
                         cvzone.putTextRect(frame, f'{id3}', (x7, y7), 1, 1)
 
-                        image_name = f"app\processing\defects\Knot_{frame_countKnot}.jpg"
+                        image_name = f"app\static\defects\Knot_{frame_countKnot}.jpg"
                         cv2.imwrite(image_name, frame)
                         frame_countKnot += 1 
 
@@ -193,20 +193,20 @@ def video_detection(video):
                         Lines.append(id4)
                         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
                         image_name = f"Line_{frame_countLine}_Mask.jpg"
-                        cv2.imwrite(f'app\processing\defects\Line_{frame_countLine}_Mask.jpg', roi_gray)
+                        cv2.imwrite(f'app\static\defects\Line_{frame_countLine}_Mask.jpg', roi_gray)
                         # Read the grayscale image
                         # Read the grayscale image
                         # Apply Canny edge detection
                         edges = cv2.Canny(roi_gray, 50, 150)
 
                         # Step 5: Save the boundary image
-                        cv2.imwrite(f'app\processing\defects\Line_{frame_countLine}_boundary.jpg', edges)
+                        cv2.imwrite(f'app\static\defects\Line_{frame_countLine}_boundary.jpg', edges)
 
                         cv2.circle(frame, (cx6, cy6), 4, (255, 0, 255), -1)
                         cv2.rectangle(frame, (x8, y8), (x10, y10), (255, 0, 0), 2)
                         cvzone.putTextRect(frame, f'{id4}', (x9, y9), 1, 1)
 
-                        image_name = f"app\processing\defects\Line_{frame_countLine}.jpg"
+                        image_name = f"app\static\defects\Line_{frame_countLine}.jpg"
                         cv2.imwrite(image_name, frame)
                         frame_countLine += 1                   
 

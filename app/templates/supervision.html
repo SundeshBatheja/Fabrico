@@ -189,7 +189,7 @@ padding: 28px 18px; /* Adjust the padding value as needed */
 }
 
 section.col-sm{
-    background-color: rgb(211, 209, 209);
+    background-color: rgb(255, 255, 255);
     width: 350px;
     height: 550px;
     border-radius: 35px;
@@ -266,6 +266,13 @@ section.col-sm{
   </form>
 </div>
 </section>
+<div class="new" >
+    <form method="POST" action="{{ url_for('Fabrico.addFabric') }}">
+        <button type="submit" class="btnCustom">
+            View Report
+        </button>
+    </form>
 
+</div>
 </body>
 </html>
