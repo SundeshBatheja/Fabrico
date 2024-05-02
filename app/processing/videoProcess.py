@@ -9,6 +9,8 @@ import os
 
 def video_detection(video):
     cap = cv2.VideoCapture(video)
+
+
     model = YOLO('app/processing/best.pt')
     my_file = open("app/processing/coco.txt", "r")
     data = my_file.read()
@@ -19,6 +21,7 @@ def video_detection(video):
     tracker = Tracker()
     tracker1 = Tracker()
     tracker2 = Tracker()
+    frame_count = 1
     cy1 = 280
     cy2 = 250
     offset = 8
@@ -32,7 +35,6 @@ def video_detection(video):
     counterbusup = []
     downtruck = {}
     countertruckdown = []
-
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -42,7 +44,7 @@ def video_detection(video):
             continue
         frame = cv2.resize(frame, (300, 500))
 
-        results = model.predict(frame)
+        results = model.predict(frame,conf=0.35, project="D:/tryyolo", name="D:/tryyolo", save=False, save_txt=False, exist_ok=True)
         a = results[0].boxes.data
         px = pd.DataFrame(a).astype("float")
 
@@ -72,21 +74,37 @@ def video_detection(video):
                 upcar[id1] = (cx3, cy3)
             if id1 in upcar:
                 if cy2 < (cy3 + offset) and cy2 > (cy3 - offset):
-                    cv2.circle(frame, (cx3, cy3), 4, (255, 0, 0), -1)
-                    cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 0, 255), 2)
-                    cvzone.putTextRect(frame, f'{id1}', (x3, y3), 1, 1)
                     if countercarup.count(id1) == 0:
                         countercarup.append(id1)
 
             if cy2 < (cy3 + offset) and cy2 > (cy3 - offset):
                 downcar[id1] = (cx3, cy3)
+
             if id1 in downcar:
+                roi = frame[y3:y4, x3:x4]
                 if cy2 < (cy3 + offset) and cy2 > (cy3 - offset):
-                    cv2.circle(frame, (cx3, cy3), 4, (255, 0, 255), -1)
-                    cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 0, 0), 2)
-                    cvzone.putTextRect(frame, f'{id1}', (x3, y3), 1, 1)
+
                     if countercardown.count(id1) == 0:
                         countercardown.append(id1)
+                        roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+                        image_name = f"Hole_{frame_count}_Mask.jpg"
+                        cv2.imwrite(f'app\processing\defects\Hole_{frame_count}_Mask.jpg', roi_gray)
+                        # Read the grayscale image
+                        # Read the grayscale image
+                        # Apply Canny edge detection
+                        edges = cv2.Canny(roi_gray, 50, 150)
+
+                        # Step 5: Save the boundary image
+                        cv2.imwrite(f'app\processing\defects\Hole_{frame_count}_boundary.jpg', edges)
+
+                        cv2.circle(frame, (cx3, cy3), 4, (255, 0, 255), -1)
+                        cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 0, 0), 2)
+                        cvzone.putTextRect(frame, f'{id1}', (x3, y3), 1, 1)
+
+                        image_name = f"app\processing\defects\Hole_{frame_count}.jpg"
+                        cv2.imwrite(image_name, frame)
+                        frame_count += 1 
+                        
 
         cv2.line(frame, (1, cy1), (300, cy1), (0, 255, 0), 2)
         cv2.line(frame, (3, cy2), (300, cy2), (0, 0, 255), 2)
@@ -96,6 +114,6 @@ def video_detection(video):
         cvzone.putTextRect(frame, f'Knots : {len(countercardown)}', (200, 130), 1, 1)
 
         yield frame
-        yield len(countercardown)
 
     cap.release()
+
