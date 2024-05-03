@@ -24,7 +24,7 @@ body {
 }
 
 .navbar {
-    background-color: transparent;
+    background-color: white;
     color: #000; /* Adjust text color for better visibility */
     padding-bottom: -5px;
     position: fixed;
@@ -219,28 +219,35 @@ section.col-sm{
        
         <h2>{{ title }}</h2>
     </div>
-
-    <!-- Sidebar -->
     <div class="sidebar">
         <h6>Menu</h6>
         <div class="links">
             <ul>
                 <li class="{% if title == 'Dashboard' %}active{% endif %}">
-                    <a href="/Fabrico/dashboard">   <i class='bx bxs-dashboard' ></i>
+                    <a href="/Fabrico/dashboard"> <i class='bx bxs-dashboard' ></i>
                     Dashboard
-                </a>
+                    </a>
                 </li>
-                <li class = "{% if title == 'Supervision' %}active{% endif %}">
-                    <a  href="/Fabrico/supervision">  <i class='bx bxs-camera-home'></i>
+                <li class="{% if title == 'Supervision' %}active{% endif %}">
+                    <a href="/Fabrico/supervision"> <i class='bx bxs-camera-home'></i>
                         Supervision
                     </a>
                 </li>
-                <li class="{% if title == 'Records' %}active{% endif %}"><a href="/Fabrico/fabrics">  <i class='bx bxs-file-find' ></i>
-                    Records</a></li>
+                <li class="{% if title == 'Records' %}active{% endif %}">
+                    <a href="/Fabrico/fabrics"> <i class='bx bxs-file-find' ></i>
+                    Records
+                    </a>
+                </li>
+                <!-- Add a line here -->
+                <hr>
+                <li class="{% if title == 'My Account' %}active{% endif %}">
+                    <a href="/Fabrico/account"> <i class='bx bxs-user'></i>
+                    My Account
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
-
 <div class="content">
     <div class="container-supervision">
         <div class="col-md">
@@ -272,7 +279,8 @@ section.col-sm{
             View Report
         </button>
     </form>
-
 </div>
+
+
 </body>
 </html>

@@ -133,25 +133,37 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="sidebar">
-        <h6>Menu</h6>
-        <div class="links">
-            <ul>
-                <li class="{% if title == 'Dashboard' %}active{% endif %}">
-                    <a href="/Fabrico/dashboard">   <i class='bx bxs-dashboard' ></i>
-                    Dashboard
+<!-- Sidebar -->
+<div class="sidebar">
+    <h6>Menu</h6>
+    <div class="links">
+        <ul>
+            <li class="{% if title == 'Dashboard' %}active{% endif %}">
+                <a href="/Fabrico/dashboard"> <i class='bx bxs-dashboard' ></i>
+                Dashboard
                 </a>
-                </li>
-                <li class = "{% if title == 'Supervision' %}active{% endif %}">
-                    <a  href="/Fabrico/supervision">  <i class='bx bxs-camera-home'></i>
-                        Supervision
-                    </a>
-                </li>
-                <li class="{% if title == 'Records' %}active{% endif %}"><a href="/Fabrico/fabrics">  <i class='bx bxs-file-find' ></i>
-                    Records</a></li>
-            </ul>
-        </div>
+            </li>
+            <li class="{% if title == 'Supervision' %}active{% endif %}">
+                <a href="/Fabrico/supervision"> <i class='bx bxs-camera-home'></i>
+                    Supervision
+                </a>
+            </li>
+            <li class="{% if title == 'Records' %}active{% endif %}">
+                <a href="/Fabrico/fabrics"> <i class='bx bxs-file-find' ></i>
+                Records
+                </a>
+            </li>
+            <!-- Add a line here -->
+            <hr>
+            <li class="{% if title == 'My Account' %}active{% endif %}">
+                <a href="/Fabrico/account"> <i class='bx bxs-user'></i>
+                My Account
+                </a>
+            </li>
+        </ul>
     </div>
+</div>
+</div>
     <div class="content">
         <div class="container-dashboard">
             <div class="row">

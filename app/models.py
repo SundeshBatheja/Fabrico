@@ -34,6 +34,8 @@ class FabricDefects(db.Model):
     defect = db.Column(db.Text, db.ForeignKey('defect.defect'), nullable=False)
     fabric_id = db.Column(db.Text, db.ForeignKey(Fabric.fabric_id),nullable=False)
     defectimage = db.Column(db.LargeBinary)
+    defectGray = db.Column(db.LargeBinary)  # New column for gray scale image
+    defectBoundary = db.Column(db.LargeBinary) 
 
     Fabric = db.relationship(Fabric, backref='FabricDefects')
     Defect = db.relationship(Defect, backref='FabricDefects')
