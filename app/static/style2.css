@@ -58,7 +58,9 @@ body {
     margin-top: 0px; /* Ensure content doesn't go behind the navbar */
     z-index: 1000; /* Ensure sidebar is above navbar */
 }
-
+.sidebar MyAccount {
+    margin-top: 100px;
+}
 .sidebar h6{
     margin-left: 41px ;
     margin-top: 110px;
@@ -89,14 +91,20 @@ body {
 }
 
 .content {
-    margin-left: 20%; /* Adjust this value to match sidebar width */
+    margin-left: 14%; /* Adjust this value to match sidebar width */
     padding: 10px;
-    padding-top: 100px; /* Ensure content doesn't go behind the navbar */
+    padding-top: 55px; /* Ensure content doesn't go behind the navbar */
 }
-.content .container-fabrics {
+
+.content2 {
+    margin-left: 18%; /* Adjust this value to match sidebar width */
+    padding: 10px;
+    padding-top: 55px; /* Ensure content doesn't go behind the navbar */
+}
+.content2 .container-fabrics {
     margin-left: -15px;
     margin-top: 30px;
-}     
+}       
 .content .container-supervision {
     margin-left: -50px;
     margin-top: 5px;
@@ -115,7 +123,9 @@ font-weight: 600;
     margin-left: -15px;
     margin-top: 30px;
 }        
-
+.content .row{
+    margin-top: -50px;
+}
 table.table td,
 th {
     text-align: center;
@@ -190,5 +200,9 @@ section.col-sm{
   margin:0px;
   padding:10px;
   margin:0px;
-  margin-top:10px;
+  margin-top:15px;
   }
+  #columnchart_values {
+    /* Your styles here */
+    margin-left: -100px;
+}

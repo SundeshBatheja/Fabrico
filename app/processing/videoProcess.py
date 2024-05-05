@@ -6,11 +6,11 @@ import numpy as np
 from app.processing.tracker import *
 import math
 import os
+import time
+from datetime import datetime
 
 def video_detection(video):
     cap = cv2.VideoCapture(video)
-
-
     model = YOLO('app/processing/best.pt')
     my_file = open("app/processing/coco.txt", "r")
     data = my_file.read()
@@ -36,7 +36,9 @@ def video_detection(video):
     Stains = []
     Knots = []
     Lines = []
-   
+    measureUnit = 0.833333
+    with open("defect_times.txt", "w") as f:
+        startTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -85,7 +87,6 @@ def video_detection(video):
             if id1 in countHole:
                 roi = frame[y3:y4, x3:x4]
                 if cy2 < (cy3 + offset) and cy2 > (cy3 - offset):
-
                     if Holes.count(id1) == 0:
                         Holes.append(id1)
                         roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
@@ -105,6 +106,21 @@ def video_detection(video):
 
                         image_name = f"app\static\defects\Hole_{frame_countHole}.jpg"
                         cv2.imwrite(image_name, frame)
+                        with open("defect_times.txt", "a") as f:
+
+                            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                            start_time = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")
+                            print("Times : ",current_time, start_time)
+                            current_datetime = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")
+                            time_diff = current_datetime - start_time
+                            centi = time_diff.total_seconds()
+                            value = round(centi/100,2) 
+                            
+                            meters = round(float(value)*measureUnit,2)
+                            if meters == float(0):
+                                meters = 0.01
+                            f.write(f"Hole_{frame_countHole} {meters} {y3}:{y4}-{x3}:{x4}\n")
                         frame_countHole += 1 
             
         for bbox in bboxStain_idx:
@@ -144,7 +160,20 @@ def video_detection(video):
 
                         image_name = f"app\static\defects\Stain_{frame_countStain}.jpg"
                         cv2.imwrite(image_name, frame)
-                        frame_countStain += 1    
+                           
+                        with open("defect_times.txt", "a") as f:
+                            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                            start_time = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")
+                            current_datetime = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")
+                            time_diff = current_datetime - start_time
+                            centi = time_diff.total_seconds()
+                            value = round(centi/100,2) 
+                            meters = round(float(value)*measureUnit,2)
+                            if meters == float(0):
+                                meters = 0.01
+                            f.write(f"Stain_{frame_countStain} {meters} {y5}:{y6}-{x5}:{x6}\n")
+                        frame_countStain += 1 
 
         for bbox in bboxKnot_idx:
             x7, y7, x8, y8, id3 = bbox
@@ -176,7 +205,20 @@ def video_detection(video):
 
                         image_name = f"app\static\defects\Knot_{frame_countKnot}.jpg"
                         cv2.imwrite(image_name, frame)
-                        frame_countKnot += 1 
+                         
+                        with open("defect_times.txt", "a") as f:
+                            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                            start_time = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")
+                            current_datetime = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")
+                            time_diff = current_datetime - start_time
+                            centi = time_diff.total_seconds()
+                            value = round(centi/100,2) 
+                            meters = round(float(value)*measureUnit,2)
+                            if meters == float(0):
+                                meters = 0.01
+                            f.write(f"Knot_{frame_countKnot} {meters} {y7}:{y8}-{x7}:{x8}\n")
+                        frame_countKnot += 1
 
         for bbox in bboxLine_idx:
             x9, y9, x10, y10, id4 = bbox
@@ -208,15 +250,34 @@ def video_detection(video):
 
                         image_name = f"app\static\defects\Line_{frame_countLine}.jpg"
                         cv2.imwrite(image_name, frame)
-                        frame_countLine += 1                   
+                                 
+                        with open("defect_times.txt", "a") as f:
+                            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+                            start_time = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")
+                            current_datetime = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")
+                            time_diff = current_datetime - start_time
+                            centi = time_diff.total_seconds()
+                            value = round(centi/100,2) 
+                            meters = round(float(value)*measureUnit,2)
+                            if meters == float(0):
+                                meters = 0.01
+                            
+
+                            f.write(f"Line_{frame_countLine} {meters} {y9}:{y10}-{x9}:{x10}\n")   
+                        frame_countLine += 1       
+        font_scale = 1.5
+        thickness = 2
+
+
+        bg_color = (0, 0, 0)  
+        text_color = (255, 255, 255)  # White
         cv2.line(frame, (3, cy2), (300, cy2), (0, 0, 255), 2)
-        cvzone.putTextRect(frame, f'Holes : {len(Holes)}', (50, 160), 1, 1)
-        cvzone.putTextRect(frame, f'Stains : {len(Stains)}', (50, 130), 1, 1)
-        cvzone.putTextRect(frame, f'Lines : {len(Lines)}', (200, 160), 1, 1)
-        cvzone.putTextRect(frame, f'Knots : {len(Knots)}', (200, 130), 1, 1)
-
+        cvzone.putTextRect(frame, f'Holes : {len(Holes)}', (15, 130), font_scale, thickness, bg_color, text_color)
+        cvzone.putTextRect(frame, f'Stains : {len(Stains)}', (15, 100), font_scale, thickness, bg_color, text_color)
+        cvzone.putTextRect(frame, f'Lines : {len(Lines)}', (165, 130), font_scale, thickness, bg_color, text_color)
+        cvzone.putTextRect(frame, f'Knots : {len(Knots)}', (165, 100), font_scale, thickness, bg_color, text_color)
         yield frame
-
     cap.release()
+   
 

@@ -3,6 +3,7 @@
 <style>
     .wrapper {
         display: flex;
+        margin-left: 95px;
     }
 
     .content {
@@ -11,7 +12,7 @@
 
     .content2 {
         margin-left: 10px; /* Adjust spacing between content 2 and content */
-        margin-top: 120px;
+        margin-top: 8px;
     }
 
     .defect-images {
@@ -32,12 +33,11 @@
 
     .table-fixed td,
     .table-fixed th {
-        width: 25%; /* Set each cell width to 25% */
+        width: 20%; /* Set each cell width to 20% */
     }
 </style>
 
 <div class="wrapper">
-    <!-- Content 1 -->
     <div class="content">
         <div class="container-supervision">
             <div class="col-md">
@@ -64,7 +64,6 @@
             </div>
         </div>
     </div>
-    <!-- Content 2 -->
     <div class="content2">
         <div class="container-fabrics">
             <div class="table-responsive">
@@ -72,21 +71,23 @@
                     <thead>
                         <tr>
                             <th scope="col">Defect Type</th>
-                            <th scope="col">Detected Defect</th>
-                            <th scope="col">Defect Area</th>
-                            <th scope="col">Border Line</th>
+                            <th scope="col">Defect Image</th>
+                            <th scope="col">Defect Boundary</th>
+                            <th scope="col">Defect Mask</th>
+                            <th scope="col">Coordinates</th>
+                            <th scope="col">Meters</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for defect_type, images in defect_images.items() %}
-                        {% for original_image, mask_image, boundary_image in images %}
+                        {% for defect in defect_data %}
                         <tr>
-                            <td>{{ defect_type }}</td>
-                            <td><a href="{{ url_for('static', filename='defects/' + original_image) }}" data-fancybox="images"><img src="{{ url_for('static', filename='defects/' + original_image) }}" class="defect-image" alt="Original"></a></td>
-                            <td><a href="{{ url_for('static', filename='defects/' + mask_image) }}" data-fancybox="images"><img src="{{ url_for('static', filename='defects/' + mask_image) }}" class="defect-image" alt="Mask"></a></td>
-                            <td><a href="{{ url_for('static', filename='defects/' + boundary_image) }}" data-fancybox="images"><img src="{{ url_for('static', filename='defects/' + boundary_image) }}" class="defect-image" alt="Boundary"></a></td>
+                            <td>{{ defect.defect_type }}</td>
+                            <td><img src="data:image/png;base64,{{ defect.image }}" class="defect-image" alt="Defect Image"></td>
+                            <td><img src="data:image/png;base64,{{ defect.boundary }}" class="defect-image" alt="Defect Boundary"></td>
+                            <td><img src="data:image/png;base64,{{ defect.mask }}" class="defect-image" alt="Defect Mask"></td>
+                            <td>{{ defect.coordinates }}</td>
+                            <td>{{ defect.meters }}</td>
                         </tr>
-                        {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -94,5 +95,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

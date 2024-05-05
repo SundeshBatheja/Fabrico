@@ -1,11 +1,9 @@
-<!-- fabricData.html -->
 
 {% extends 'base.html' %}
 {% block content %}
-    <!-- Content -->
-    <div class="content">
+   
+    <div class="content2">
         <div class="container-fabrics">
-            <!-- Search bar -->
             <div class="search-container">
                 <input type="text" id="fabricSearch" class="search-input" placeholder="Search for fabrics..." onkeyup="searchFabrics()">
                 <i class="bx bx-search search-icon"></i>
@@ -17,6 +15,8 @@
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Fabric ID</th>
+                            <th scope="col">Observer</th>
+                            <th scope="col">Dated</th>
                             <th scope="col">Defects</th>
                         </tr>
                     </thead>
@@ -25,6 +25,8 @@
                             <tr>
                                 <td>{{ fabric.id }}</td>
                                 <td>{{ fabric.fabric_id }}</td>
+                                <td>{{ fabric.user.userid }}</td>  
+                                <td>{{ fabric.date_added.strftime('%d-%m-%Y') }}</td>  
                                 <td>
                                     {% set defect_counts = fabric_defects.get(fabric.fabric_id, {}) %}
                                     {% set total_defects = defect_counts.values()|sum %}
@@ -45,7 +47,6 @@
         </div>
     </div>
 
-    <!-- JavaScript for search -->
     <script>
         function searchFabrics() {
             var input, filter, table, tr, td, i, txtValue;
@@ -67,7 +68,7 @@
                     }
                 }
                 if (!found) {
-                    // Check if the "Total" text contains the filter
+                  
                     var totalText = tr[i].getElementsByTagName("b")[0];
                     if (totalText) {
                         txtValue = totalText.textContent || totalText.innerText;
@@ -82,7 +83,6 @@
         }
     </script>
 
-    <!-- CSS for search bar -->
     <style>
         .search-container {
             position: relative;

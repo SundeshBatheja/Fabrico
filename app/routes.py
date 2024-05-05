@@ -7,11 +7,13 @@ from wtforms import FileField, SubmitField,StringField,DecimalRangeField,Integer
 from wtforms.validators import InputRequired,NumberRange
 from flask import request
 from werkzeug.utils import secure_filename
-from app.models import Defect,Fabric, FabricDefects
+from app.models import Defect,Fabric, FabricDefects, User
 from app import db
 from app.processing.videoProcess import video_detection
 import os
 import cv2
+import base64
+from flask_bcrypt import generate_password_hash, check_password_hash
 
 flag_check = False
 
@@ -25,7 +27,13 @@ def generate_frames(path_x=''):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
-
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if 'logged_in' in session and session['logged_in']:
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('Fabrico.login'))
+    return wrapper
      
         
 class UploadFileForm(FlaskForm):
@@ -44,22 +52,26 @@ def login():
     title = "sign In"
     return render_template('login.html',title=title)
 
-@FabricoPrefix.route('/registerUser')
-def register():
-    title = "Sign Up"
-    return render_template('register.html',title=title)
+@FabricoPrefix.route('/logout')
+def logout():
+    session['logged_in'] = False
+    return redirect(url_for('Fabrico.login'))
 
 @FabricoPrefix.route('/account')
 def MyAccount():
-    title = "My Account"
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
+    title = "MyAccount"
     return render_template('userAccount.html',title=title)
 
 @FabricoPrefix.route('/fabrics')
 def index():
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
     title = "Records"
     fabrics = Fabric.query.all()
     fabric_defects = {}
-    
+    userid = session['UserId']
     fabric_defects = {}
     for fabric in fabrics:
         defect_counts = {}
@@ -68,22 +80,27 @@ def index():
             defect_counts[defect_entry.defect] = defect_counts.get(defect_entry.defect, 0) + 1
         fabric_defects[fabric.fabric_id] = defect_counts
 
-    return render_template('fabricData.html', title=title, fabrics=fabrics, fabric_defects=fabric_defects)
+    return render_template('fabricData.html', title=title, fabrics=fabrics, fabric_defects=fabric_defects,userid=userid)
 
 @FabricoPrefix.route('/supervision',methods=['GET','POST'])
 def supervision():
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
     title = "Supervision"
     form = UploadFileForm()
+    userid = session['UserId']
     if form.validate_on_submit():
         file = form.file.data
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
         session['video_path'] = file_path
-    return render_template('supervision.html',title=title,form = form)
+    return render_template('supervision.html',title=title,form = form,userid=userid)
 
 @FabricoPrefix.route('/video')
 def video():
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
     global flag_check
     video_path = session.get('video_path', None)
     if video_path:
@@ -102,9 +119,38 @@ def video():
     else:
         return "No video uploaded"
     
+@FabricoPrefix.route('/LoginForm', methods=['POST'])
+def loginForm():
+    Userid = request.form.get('userid')
+    Password = request.form.get('password')
+    if not Userid or not Password:
+        error_statement = 'All fields are required...'
+        print('All fields are required.')
+        return render_template('login.html', error_statement=error_statement,
+                               username=Userid, password=Password)
+    
+    # Check if user exists
+    user = User.query.filter_by(userid=Userid).first()
+    hashed = generate_password_hash(Password).decode('utf-8')
+   
+    if user and (user.password_hash == "$2b$12$n.9fAGiMdVrIHZ8ior1OXucSfMC3EgYEumeCtBEoHO/aGU/tXsChW"):
+        print("Working")
+        session['logged_in'] = True
+        session['UserId'] = Userid
+        title = "Supervision"
+        return render_template('supervision.html',userid=Userid,title=title)
+    else:
+        error_statement = 'Invalid credentials. Please try again.'
+        return render_template('login.html', error_statement=error_statement,
+                               userid=Userid, password=Password)
+
+ 
 @FabricoPrefix.route('/addFabric', methods=['GET', 'POST'])
 def addFabric():
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
     title = "Fabric Report"
+    userid = session['UserId']
     global flag_check
     if request.method == 'POST' and flag_check==True:
         defectDir = 'app/static/defects'  # Use forward slashes instead of backslashes
@@ -116,18 +162,29 @@ def addFabric():
         new_fabric = Fabric(
             fabric_id=fabric_id,
             total_defects=total_defects,
-            date_added=today_date
+            date_added=today_date,
+            userid=userid
         )
         db.session.add(new_fabric)
         db.session.commit()
         defect_types = {}
         defect_images = {}
+        defect_coordinates = {}  # Store defect coordinates
+        defect_meters = {} 
+        with open("defect_times.txt", "r") as f:
+                    for line in f:
+                        parts = line.strip().split()
+                        defect_type2 = parts[0]
+                        meters = float(parts[1])  # Extract meters as float
+                        coordinates = parts[2]  # Extract coordinates
+                        defect_coordinates[defect_type2] = coordinates
+                        defect_meters[defect_type2] = meters
+                    print(defect_coordinates, defect_meters)
         for defect_type in ['Hole', 'Stain', 'Line', 'Knot']:
             count = len([f for f in os.listdir(defectDir) if f.startswith(defect_type)]) // 3
             if count > 0:
                 defect_types[defect_type] = int(count)
                 defect_images[defect_type] = []
-
                 # Get the images for the defect type
                 for i in range(1, count + 1):
                     original_image_name = f"{defect_type}_{i}.jpg"
@@ -142,23 +199,47 @@ def addFabric():
 
                     with open(os.path.join(defectDir, boundary_image_name), 'rb') as f:
                         boundary_image_data = f.read()
+                    defect_type2 = defect_type +"_"+str(i)
                     fabric_defect = FabricDefects(
                         defect=defect_type,
                         fabric_id=fabric_id,
                         defectimage=original_image_data,
                         defectGray=gray_image_data,
-                        defectBoundary=boundary_image_data
+                        defectBoundary=boundary_image_data,
+                        coordinates=defect_coordinates.get(defect_type2, ''),  # Store coordinates
+                        meters=defect_meters.get(defect_type2, 0.0)  # Store meters
                     )
                     db.session.add(fabric_defect)
                     db.session.commit()
-                    original_image = f"{defect_type}_{i}.jpg"
-                    mask_image = f"{defect_type}_{i}_Mask.jpg"
-                    boundary_image = f"{defect_type}_{i}_boundary.jpg"
-                    defect_images[defect_type].append((original_image, mask_image, boundary_image))
+        defects = FabricDefects.query.filter_by(fabric_id=fabric_id).all()
     
-        flag_check = False
+        # List to store defect images, boundaries, and masks
+        defect_data = []
+
+        
+        # Loop through each defect to get its images
+        for defect in defects:
+            if defect.defectimage:
+                defect_image_base64 = base64.b64encode(defect.defectimage).decode('utf-8')
+            
+            if defect.defectBoundary:
+                defect_boundary_base64 = base64.b64encode(defect.defectBoundary).decode('utf-8')
+            
+            if defect.defectGray:
+                defect_mask_base64 = base64.b64encode(defect.defectGray).decode('utf-8')
+            
+            defect_data.append({
+                'image': defect_image_base64,
+                'boundary': defect_boundary_base64,
+                'mask': defect_mask_base64,
+                'coordinates': defect.coordinates,
+                'defect_type': defect.defect,
+                'meters': defect.meters,
+                # Add other fields here as needed
+            })
         return render_template('report.html', fabric_id=fabric_id, total_defects=total_defects,
-                               date_added=today_date, defect_types=defect_types, defect_images=defect_images,title=title)
+                               date_added=today_date,defect_data = defect_data,
+                               title=title, userid=userid)
     else:
         title = "Supervision"
         form = UploadFileForm()
@@ -168,11 +249,16 @@ def addFabric():
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
             session['video_path'] = file_path
-        return render_template('supervision.html',title=title,form = form)
+            userid = session['UserId']
+        flag_check = False
+        return render_template('supervision.html',title=title,form = form,userid=userid)
 
 @FabricoPrefix.route('/dashboard')
 def dashboard():
+    if 'logged_in' not in session:
+        return redirect(url_for('Fabrico.login'))
     title = "Dashboard"
+    userid = session['UserId']
      # Get all fabrics
     fabrics = Fabric.query.all()
 
@@ -207,26 +293,4 @@ def dashboard():
 
     return render_template('dashboard.html', title=title, defected_count=defected_count, non_defected_count=non_defected_count, 
                            defected_count_today=defected_count_today, non_defected_count_today=non_defected_count_today,
-                           hole_count=hole_count, stain_count=stain_count, line_count=line_count, knot_count=knot_count,defected_count_yesterday=defected_count_yesterday)
-@FabricoPrefix.route('/LoginForm',methods=['POST'])
-def loginForm():
-    Username = request.form.get('username')
-    Password = request.form.get('password')
-    if not Username or not Password:
-        error_statement = 'All fields are required...'
-        print('All fields are required.')
-        return render_template('login.html',error_statement=error_statement,
-                               username=Username,password=Password)
-    return render_template('fabricData.html')
-
-@FabricoPrefix.route('/RegisterForm',methods=['POST'])
-def registerForm():
-    Username = request.form.get('username')
-    Password = request.form.get('password')
-    systemid = request.form.get('systemid')
-    if not Username or not Password or not systemid:
-        error_statement = 'All fields are required.'
-        print('All fields are required.')
-        return render_template('register.html',error_statement=error_statement,
-                               username=Username,password=Password,systemid=systemid)
-    return render_template('fabricData.html')
+                           hole_count=hole_count, stain_count=stain_count, line_count=line_count, knot_count=knot_count,defected_count_yesterday=defected_count_yesterday,userid=userid)
