@@ -49,6 +49,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @FabricoPrefix.route('/')
 def login():
+    if 'logged_in' in session:
+        return redirect(url_for('Fabrico.supervision'))
     title = "sign In"
     return render_template('login.html',title=title)
 

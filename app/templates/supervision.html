@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ title }} </title>
+    
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style2.css') }}">
    <style>
@@ -21,11 +22,59 @@ body {
     margin: 0;
     padding: 0;
 }
+.logout-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff; /* Adjust color as needed */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 93%;
+    margin-top: -500px;
+    padding-top: 10px;
+    margin-right: 20px;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #0056b3; /* Adjust hover color as needed */
+}
+
+/* Add this style for the logout button */
+.new2 .btnCustom {
+    padding: 10px 20px;
+    background-color: #dc3545; /* Adjust color as needed */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.new2 .btnCustom:hover {
+    background-color: #c82333; /* Adjust hover color as needed */
+}
+
+/* Add this style for the upload button */
+.new .btnCustom {
+    padding: 10px 20px;
+    background-color: #28a745; /* Adjust color as needed */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.new .btnCustom:hover {
+    background-color: #218838; /* Adjust hover color as needed */
+}
 
 .navbar {
     background-color: white;
     color: #000; /* Adjust text color for better visibility */
     padding-bottom: -5px;
+    margin-top: -5px;
     position: fixed;
     left: 0;
     width: 100%;
@@ -224,6 +273,7 @@ section.col-sm{
         </div>
        
         <h2>{{ title }}</h2>
+        <a href="{{ url_for('Fabrico.logout') }}" class="logout-btn">Logout</a>
     </div>
     <div class="sidebar">
         <h6>Menu</h6>
@@ -250,11 +300,13 @@ section.col-sm{
                     {{userid}}
                     </a>
                 </li>
-                <li class="{% if title == 'Admin Portal' %}active{% endif %}">
-                    <a href="/Fabrico/adminPortal"> <i class='bx bxs-user'></i>
-                        Admin Portal
-                    </a>
-                </li>
+                {% if userid == 'Emp01' %}
+            <li class="{% if title == 'Admin Portal' %}active{% endif %}">
+                <a href="/Fabrico/adminPortal"> <i class='bx bxs-user'></i>
+                    Admin Portal
+                </a>
+            </li>
+            {% endif %}
             </ul>
         </div>
     </div>
