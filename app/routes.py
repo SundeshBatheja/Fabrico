@@ -95,22 +95,26 @@ def portal():
 
 @FabricoPrefix.route('/addPage')
 def renderAddUser():
-    return render_template('addUser.html')
+    title = "Add User"
+    userid = session['UserId']
+    return render_template('addUser.html', title=title,userid=userid)
 
 @FabricoPrefix.route('/addUser', methods=['POST'])
 def addUser():
     if request.method == 'POST':
         username = request.form.get('username')
-        userid = request.form.get('userid')
         password = request.form.get('password')
 
-        if not username or not userid or not password:
+        if not username or not password:
             return jsonify({'error': 'All fields are required'}), 400
-
-        existing_user = User.query.filter_by(userid=userid).first()
-        if existing_user:
-            return jsonify({'error': 'User with this ID already exists'}), 400
-
+        
+        # Get the number of existing users
+        num_users = User.query.count()
+        
+        # Generate the userid in the format "Emp{length of all users + 1}"
+        userid = f"Emp{num_users + 1}"
+        
+        # Create the new user with the generated userid
         new_user = User(username=username, userid=userid)
         new_user.set_password(password)
         db.session.add(new_user)
@@ -131,17 +135,11 @@ def editUser(userid):
         new_userid = request.form.get('userid')
         password = request.form.get('password')
 
-        if not username or not new_userid:
+        if not username:
             return jsonify({'error': 'Username and UserID are required'}), 400
 
         # Update user details
         user.username = username
-        if new_userid != user.userid:
-            # Check if the new userid already exists
-            existing_user = User.query.filter_by(userid=userid).first()
-            if existing_user:
-                return jsonify({'error': 'User with this UserID already exists'}), 400
-            user.userid = new_userid
         if password:
             # If password is provided, update it
             user.set_password(password)
@@ -150,6 +148,7 @@ def editUser(userid):
         return redirect(url_for('Fabrico.portal'))
     userid = session['UserId']
     return render_template('editUser.html', user=user,userid=userid)
+
 
 
 @FabricoPrefix.route('/deleteUser/<int:userid>', methods=['POST', 'DELETE'])

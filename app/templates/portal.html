@@ -24,10 +24,19 @@
                             <tr>
                                 <td>{{ user.id }}</td>
                                 <td>{{ user.username }}</td>
-                                <td>{{ user.userid }}</td>  
-                                <td>
-                                    <a href="{{ url_for('Fabrico.editUser', userid=user.id) }}">Edit</a> |
-                                    <a href="{{ url_for('Fabrico.deleteUser', userid=user.id) }}">Delete</a> 
+                                <td>{{ user.userid }}</td> 
+                                    <td class="text-center">
+                                        <div class="row justify-content-center">
+                                            <div class="col-auto">
+                                              <a href="{{ url_for('Fabrico.editUser', userid=user.id) }}" class="btn btn-primary">Edit</a>
+                                            </div>
+                                            <div class="col-auto">
+                                              <form action="{{ url_for('Fabrico.deleteUser', userid=user.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                              </form>
+                                            </div>
+                                          </div>
+        
                                 </td>
                             </tr>
                         {% endfor %}
@@ -69,7 +78,7 @@
             position: relative;
             margin-bottom: 20px;
         }
-
+        
         .search-input {
             width: 100%;
             padding: 10px;
