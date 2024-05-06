@@ -13,7 +13,7 @@ from app.processing.videoProcess import video_detection
 import os
 import cv2
 import base64
-from flask_bcrypt import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 flag_check = False
 
@@ -82,6 +82,84 @@ def index():
 
     return render_template('fabricData.html', title=title, fabrics=fabrics, fabric_defects=fabric_defects,userid=userid)
 
+@FabricoPrefix.route('/adminPortal')
+def portal():
+    if 'logged_in' not in session or session['UserId'] != 'Emp01':
+        return redirect(url_for('Fabrico.login'))
+    
+    title = "Admin Portal"
+    userid = session['UserId']
+    users = User.query.filter(User.userid != 'Emp01').all()
+
+    return render_template('portal.html', title=title, userid=userid, users=users)
+
+@FabricoPrefix.route('/addPage')
+def renderAddUser():
+    return render_template('addUser.html')
+
+@FabricoPrefix.route('/addUser', methods=['POST'])
+def addUser():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        userid = request.form.get('userid')
+        password = request.form.get('password')
+
+        if not username or not userid or not password:
+            return jsonify({'error': 'All fields are required'}), 400
+
+        existing_user = User.query.filter_by(userid=userid).first()
+        if existing_user:
+            return jsonify({'error': 'User with this ID already exists'}), 400
+
+        new_user = User(username=username, userid=userid)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect(url_for('Fabrico.portal'))
+    else:
+        return jsonify({'error': 'Method not allowed'}), 405
+
+@FabricoPrefix.route('/editUser/<int:userid>', methods=['GET', 'POST'])
+def editUser(userid):
+    user = User.query.filter_by(id=userid).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        new_userid = request.form.get('userid')
+        password = request.form.get('password')
+
+        if not username or not new_userid:
+            return jsonify({'error': 'Username and UserID are required'}), 400
+
+        # Update user details
+        user.username = username
+        if new_userid != user.userid:
+            # Check if the new userid already exists
+            existing_user = User.query.filter_by(userid=userid).first()
+            if existing_user:
+                return jsonify({'error': 'User with this UserID already exists'}), 400
+            user.userid = new_userid
+        if password:
+            # If password is provided, update it
+            user.set_password(password)
+
+        db.session.commit()
+        return redirect(url_for('Fabrico.portal'))
+    userid = session['UserId']
+    return render_template('editUser.html', user=user,userid=userid)
+
+
+@FabricoPrefix.route('/deleteUser/<int:userid>', methods=['POST', 'DELETE'])
+def deleteUser(userid):
+    user = User.query.filter_by(id=userid).first()
+    if request.method in ['POST', 'DELETE']:
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('Fabrico.portal'))
+
 @FabricoPrefix.route('/supervision',methods=['GET','POST'])
 def supervision():
     if 'logged_in' not in session:
@@ -131,14 +209,14 @@ def loginForm():
     
     # Check if user exists
     user = User.query.filter_by(userid=Userid).first()
-    hashed = generate_password_hash(Password).decode('utf-8')
    
-    if user and (user.password_hash == "$2b$12$n.9fAGiMdVrIHZ8ior1OXucSfMC3EgYEumeCtBEoHO/aGU/tXsChW"):
+    if user and check_password_hash(user.password_hash, Password):
         print("Working")
         session['logged_in'] = True
         session['UserId'] = Userid
         title = "Supervision"
-        return render_template('supervision.html',userid=Userid,title=title)
+        form = UploadFileForm()
+        return render_template('supervision.html', userid=Userid, title=title, form=form)
     else:
         error_statement = 'Invalid credentials. Please try again.'
         return render_template('login.html', error_statement=error_statement,
@@ -252,6 +330,44 @@ def addFabric():
             userid = session['UserId']
         flag_check = False
         return render_template('supervision.html',title=title,form = form,userid=userid)
+
+@FabricoPrefix.route('/fabricDetail/<fabric_id>')
+def fabricDetail(fabric_id):
+    fabric = Fabric.query.filter_by(fabric_id=fabric_id).first()
+    defects = FabricDefects.query.filter_by(fabric_id=fabric_id).all()
+    
+    # List to store defect data
+    defect_data = []
+    
+    # Loop through each defect to get its details
+    for defect in defects:
+        defect_image_base64 = defect_boundary_base64 = defect_mask_base64 = None
+        if defect.defectimage:
+            defect_image_base64 = base64.b64encode(defect.defectimage).decode('utf-8')
+        
+        if defect.defectBoundary:
+            defect_boundary_base64 = base64.b64encode(defect.defectBoundary).decode('utf-8')
+        
+        if defect.defectGray:
+            defect_mask_base64 = base64.b64encode(defect.defectGray).decode('utf-8')
+        
+        defect_data.append({
+            'image': defect_image_base64,
+            'boundary': defect_boundary_base64,
+            'mask': defect_mask_base64,
+            'coordinates': defect.coordinates,
+            'defect_type': defect.defect,
+            'meters': defect.meters,
+            # Add other fields here as needed
+        })
+    
+    today_date = fabric.date_added.strftime('%d-%m-%Y')
+    title = "Fabric Details"
+    userid = session.get('UserId', 'Unknown')
+    
+    return render_template('report.html', fabric_id=fabric.fabric_id, defect_data=defect_data,
+                           total_defects=len(defects), date_added=today_date,
+                           title=title, userid=userid)
 
 @FabricoPrefix.route('/dashboard')
 def dashboard():

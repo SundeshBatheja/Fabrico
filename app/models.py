@@ -5,9 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    userid = db.Column(db.String(120), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
+    username = db.Column(db.String(256), unique=False, nullable=False)
+    userid = db.Column(db.String(256), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
 
     fabrics = db.relationship('Fabric', backref='user', lazy='dynamic')
 
@@ -29,7 +29,7 @@ class Fabric(db.Model):
     fabric_id = db.Column(db.Text, unique=True)
     total_defects = db.Column(db.Integer)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-    userid = db.Column(db.String(120), db.ForeignKey('user.userid'))
+    userid = db.Column(db.String(256), db.ForeignKey('user.userid'))
 
 class FabricDefects(db.Model):
     __tablename__ = 'FabricDefects'

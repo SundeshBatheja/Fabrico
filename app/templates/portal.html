@@ -1,42 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-   
     <div class="content2">
         <div class="container-fabrics">
             <div class="search-container">
-                <input type="text" id="fabricSearch" class="search-input" placeholder="Search for fabrics..." onkeyup="searchFabrics()">
+                <input type="text" id="fabricSearch" class="search-input" placeholder="Search for users..." onkeyup="searchUsers()">
                 <i class="bx bx-search search-icon"></i>
             </div>
-            
+            <div class="btn-group mb-3">
+                <a href="{{ url_for('Fabrico.renderAddUser') }}" class="btn btn-primary">Add User</a>
+            </div>
             <div class="table-responsive">
-                <table id="fabricTable" class="table table-striped table-bordered">
+                <table id="userTable" class="table table-striped table-bordered">
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
-                            <th scope="col">Fabric ID</th>
-                            <th scope="col">Observer</th>
-                            <th scope="col">Dated</th>
-                            <th scope="col">Defects</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">UserID</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for fabric in fabrics %}
+                        {% for user in users %}
                             <tr>
-                                <td>{{ fabric.id }}</td>
-                                <td><a href="{{ url_for('Fabrico.fabricDetail', fabric_id=fabric.fabric_id) }}">{{ fabric.fabric_id }}</a></td>
-                                <td>{{ fabric.user.userid }}</td>  
-                                <td>{{ fabric.date_added.strftime('%d-%m-%Y') }}</td>  
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.userid }}</td>  
                                 <td>
-                                    {% set defect_counts = fabric_defects.get(fabric.fabric_id, {}) %}
-                                    {% set total_defects = defect_counts.values()|sum %}
-                                    <b>Total: {{ total_defects }}</b>
-                                    {% if total_defects > 0 %}
-                                        {% for defect, count in defect_counts.items() %}
-                                            &nbsp;&nbsp;&nbsp;{{ count }} {{ defect }}
-                                        {% endfor %}
-                                    {% else %}
-                                        No defects
-                                    {% endif %}
+                                    <a href="{{ url_for('Fabrico.editUser', userid=user.id) }}">Edit</a> |
+                                    <a href="{{ url_for('Fabrico.deleteUser', userid=user.id) }}">Delete</a> 
                                 </td>
                             </tr>
                         {% endfor %}
@@ -47,11 +38,11 @@
     </div>
 
     <script>
-        function searchFabrics() {
+        function searchUsers() {
             var input, filter, table, tr, td, i, txtValue;
             input = document.getElementById("fabricSearch");
             filter = input.value.toUpperCase();
-            table = document.getElementById("fabricTable");
+            table = document.getElementById("userTable");
             tr = table.getElementsByTagName("tr");
             for (i = 0; i < tr.length; i++) {
                 td = tr[i].getElementsByTagName("td");
@@ -67,14 +58,6 @@
                     }
                 }
                 if (!found) {
-                    var totalText = tr[i].getElementsByTagName("b")[0];
-                    if (totalText) {
-                        txtValue = totalText.textContent || totalText.innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            tr[i].style.display = "";
-                            continue;
-                        }
-                    }
                     tr[i].style.display = "none";
                 }
             }
